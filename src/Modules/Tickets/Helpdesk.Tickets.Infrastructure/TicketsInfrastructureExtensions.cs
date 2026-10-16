@@ -22,6 +22,7 @@ public static class TicketsInfrastructureExtensions
         // Same scoped DbContext instance the repositories use, so SaveChanges commits their changes.
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<TicketsDbContext>());
         services.AddScoped<ITicketRepository, TicketRepository>();
+        services.AddScoped<ITicketReader, TicketReader>();
 
         return services;
     }

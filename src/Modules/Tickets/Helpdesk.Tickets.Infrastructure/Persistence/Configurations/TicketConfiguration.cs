@@ -40,10 +40,13 @@ internal sealed class TicketConfiguration : IEntityTypeConfiguration<Ticket>
             child.Property(c => c.Description).HasMaxLength(500).IsRequired();
             child.Property(c => c.IsDone).IsRequired();
 
+            // All child tasks per ticket; used when loading the aggregate. Declared explicitly because
+            // EF would otherwise treat the filtered index below as covering the foreign key.
+            child.HasIndex(["TicketId"], "IX_ChildTasks_TicketId");
+
             // Open (not done) child tasks per ticket; used e.g. by the "can close" check.
-            child.HasIndex("TicketId")
-                .HasFilter("[IsDone] = 0")
-                .HasDatabaseName("IX_ChildTasks_TicketId_Open");
+            child.HasIndex(["TicketId"], "IX_ChildTasks_TicketId_Open")
+                .HasFilter("[IsDone] = 0");
         });
 
         builder.Navigation(t => t.ChildTasks).UsePropertyAccessMode(PropertyAccessMode.Field);

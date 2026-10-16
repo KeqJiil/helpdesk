@@ -17,3 +17,6 @@ app.MapGet("/health", () => "OK");
 app.MapTicketsEndpoints();
 
 app.Run();
+
+// Exposes the entry point to WebApplicationFactory<Program> in integration tests.
+public partial class Program;

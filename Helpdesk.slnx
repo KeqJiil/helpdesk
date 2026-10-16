@@ -1,6 +1,6 @@
 <Solution>
   <Folder Name="/src/">
-    <File Path="SKILL.md" />
+    <File Path="SKILLS.md" />
     <Project Path="src/Helpdesk.Host/Helpdesk.Host.csproj" />
     <Project Path="src/Helpdesk.SharedKernel/Helpdesk.SharedKernel.csproj" />
   </Folder>
@@ -14,5 +14,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/Helpdesk.ArchitectureTests/Helpdesk.ArchitectureTests.csproj" />
     <Project Path="tests/Helpdesk.Tickets.Domain.Tests/Helpdesk.Tickets.Domain.Tests.csproj" />
+    <Project Path="tests/Helpdesk.Tickets.IntegrationTests/Helpdesk.Tickets.IntegrationTests.csproj" />
   </Folder>
 </Solution>

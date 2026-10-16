@@ -3,6 +3,8 @@ using Helpdesk.Tickets.Application.Commands.AddChildTask;
 using Helpdesk.Tickets.Application.Commands.CloseTicket;
 using Helpdesk.Tickets.Application.Commands.CompleteChildTask;
 using Helpdesk.Tickets.Application.Commands.CreateTicket;
+using Helpdesk.Tickets.Application.Queries.GetTicketById;
+using Helpdesk.Tickets.Application.Queries.GetTicketChildrenById;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Helpdesk.Tickets.Application;
@@ -18,6 +20,9 @@ public static class TicketsApplicationExtensions
             .AddCommandHandler<CreateTicketCommand, Guid, CreateTicketCommandHandler>()
             .AddCommandHandler<CloseTicketCommand, CloseTicketCommandHandler>()
             .AddCommandHandler<AddChildTaskCommand, Guid, AddChildTaskCommandHandler>()
-            .AddCommandHandler<CompleteChildTaskCommand, CompleteChildTaskCommandHandler>();
+            .AddCommandHandler<CompleteChildTaskCommand, CompleteChildTaskCommandHandler>()
+            .AddQueryHandler<GetTicketByIdQuery, TicketResponse, GetTicketByIdQueryHandler>()
+            .AddQueryHandler<GetTicketChildrenByIdQuery, ChildTasksPage, GetTicketChildrenByIdQueryHandler>()
+            .AddValidator<GetTicketChildrenByIdQuery, GetTicketChildrenByIdQueryValidator>();
     }
 }

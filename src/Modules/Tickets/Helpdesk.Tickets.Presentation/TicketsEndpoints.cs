@@ -4,6 +4,8 @@ using Helpdesk.Tickets.Application.Commands.AddChildTask;
 using Helpdesk.Tickets.Application.Commands.CloseTicket;
 using Helpdesk.Tickets.Application.Commands.CompleteChildTask;
 using Helpdesk.Tickets.Application.Commands.CreateTicket;
+using Helpdesk.Tickets.Application.Queries.GetTicketById;
+using Helpdesk.Tickets.Application.Queries.GetTicketChildrenById;
 using Helpdesk.Tickets.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -47,8 +49,22 @@ public static class TicketsEndpoints
             [FromServices] ICommandHandler<CompleteChildTaskCommand> handler, CancellationToken ct) =>
             ToResponse(await handler.Handle(new CompleteChildTaskCommand(ticketId, childTaskId), ct)));
 
+        tickets.MapGet("/{ticketId:guid}", async (Guid ticketId,
+            [FromServices] IQueryHandler<GetTicketByIdQuery, TicketResponse> handler, CancellationToken ct) =>
+            ToOk(await handler.Handle(new GetTicketByIdQuery(ticketId), ct)));
+
+        // Keyset pagination: pass the previous page's nextCursor as ?after= to get the next page.
+        tickets.MapGet("/{ticketId:guid}/child-tasks", async (Guid ticketId, Guid? after, int? pageSize,
+            [FromServices] IQueryHandler<GetTicketChildrenByIdQuery, ChildTasksPage> handler, CancellationToken ct) =>
+            ToOk(await handler.Handle(new GetTicketChildrenByIdQuery(
+                ticketId, after, pageSize ?? GetTicketChildrenByIdQuery.DefaultPageSize), ct)));
+
         return app;
     }
+
+    // Queries: 200 with the value on success.
+    private static IResult ToOk<T>(Result<T> result) =>
+        result.IsSuccess ? Results.Ok(result.Value) : ToProblem(result.Error);
 
     // No-value commands: 204 on success.
     private static IResult ToResponse(Result result) =>

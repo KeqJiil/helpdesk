@@ -25,6 +25,26 @@ internal sealed class ValidationInterceptor<TCommand, TResponse>(
     }
 }
 
+/// <summary>Same as <see cref="ValidationInterceptor{TCommand, TResponse}"/>, for queries.</summary>
+internal sealed class ValidationQueryInterceptor<TQuery, TResponse>(
+    IQueryHandler<TQuery, TResponse> inner,
+    IEnumerable<IValidator<TQuery>> validators)
+    : IQueryHandler<TQuery, TResponse>
+    where TQuery : IQuery<TResponse>
+{
+    public Task<Result<TResponse>> Handle(TQuery query, CancellationToken ct)
+    {
+        foreach (var validator in validators)
+        {
+            var errors = validator.Validate(query);
+            if (errors.Count > 0)
+                return Task.FromResult(Result.Failure<TResponse>(errors[0]));
+        }
+
+        return inner.Handle(query, ct);
+    }
+}
+
 /// <summary>Same as <see cref="ValidationInterceptor{TCommand, TResponse}"/>, for commands with no value.</summary>
 internal sealed class ValidationInterceptor<TCommand>(
     ICommandHandler<TCommand> inner,

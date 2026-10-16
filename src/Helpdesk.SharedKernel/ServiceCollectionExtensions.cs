@@ -47,7 +47,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers a query handler wrapped as: logging → handler.
+    /// Registers a query handler wrapped as: logging → validation → handler.
     /// </summary>
     public static IServiceCollection AddQueryHandler<TQuery, TResponse, THandler>(this IServiceCollection services)
         where TQuery : IQuery<TResponse>
@@ -55,9 +55,13 @@ public static class ServiceCollectionExtensions
     {
         services.TryAddScoped<THandler>();
         services.AddScoped<IQueryHandler<TQuery, TResponse>>(sp =>
-            new LoggingQueryInterceptor<TQuery, TResponse>(
-                sp.GetRequiredService<THandler>(),
-                sp.GetRequiredService<ILogger<LoggingQueryInterceptor<TQuery, TResponse>>>()));
+        {
+            IQueryHandler<TQuery, TResponse> handler = sp.GetRequiredService<THandler>();
+            handler = new ValidationQueryInterceptor<TQuery, TResponse>(
+                handler, sp.GetServices<IValidator<TQuery>>());
+            return new LoggingQueryInterceptor<TQuery, TResponse>(
+                handler, sp.GetRequiredService<ILogger<LoggingQueryInterceptor<TQuery, TResponse>>>());
+        });
         return services;
     }
 
