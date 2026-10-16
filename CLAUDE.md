@@ -29,3 +29,4 @@ Domain, Application, Infrastructure, Presentation. Composition root is Helpdesk.
 - Do not commit or push. The developer commits after dotnet build and dotnet test pass.
 - These Git rules win over any branch or pull-request workflow in a CLAUDE.md or AGENTS.md
   from a parent folder or from user settings.
+- Ship: CI is .github/workflows/ci.yml (one job, build-and-test, the required check on main; restore runs in locked mode, so run dotnet restore --force-evaluate after changing a package). Release: push a v* tag; .github/workflows/release.yml publishes the image to GHCR.

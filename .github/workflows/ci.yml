@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or PR cancels the run still in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    # Linux runners ship with Docker, which the Testcontainers integration tests need.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Build.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Helpdesk.slnx
+
+      # TreatWarningsAsErrors is on in Directory.Build.props, so any warning fails this step.
+      - name: Build
+        run: dotnet build Helpdesk.slnx -c Release --no-restore
+
+      - name: Check every model change has a migration
+        run: |
+          dotnet tool install --global dotnet-ef --version 10.0.13
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Modules/Tickets/Helpdesk.Tickets.Infrastructure \
+            --startup-project src/Helpdesk.Host \
+            --context TicketsDbContext \
+            --configuration Release \
+            --no-build
+
+      # Domain, architecture and integration tests (the last start SQL Server via Testcontainers).
+      - name: Test
+        run: >
+          dotnet test Helpdesk.slnx -c Release --no-build
+          --logger "trx"
+          --logger "console;verbosity=normal"
+          --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults/**/*.trx
+          if-no-files-found: warn
+
+  docker-image:
+    name: Docker image builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Build only, never pushed: proves src/Helpdesk.Host/Dockerfile still works.
+      - name: Build image
+        run: docker build -f src/Helpdesk.Host/Dockerfile -t helpdesk-app:ci .

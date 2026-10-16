@@ -24,7 +24,7 @@ public static class TicketsEndpoints
         var tickets = app.MapGroup("/tickets").WithTags("Tickets");
 
         tickets.MapPost("/", async (CreateTicketRequest request,
-            [FromServices] ICommandHandler<CreateTicketCommand, Guid> handler, CancellationToken ct) =>
+            CreateTicketCommandHandler handler, CancellationToken ct) =>
         {
             var result = await handler.Handle(new CreateTicketCommand(request.Title), ct);
             return result.IsSuccess
