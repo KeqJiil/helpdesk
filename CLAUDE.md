@@ -20,7 +20,9 @@ Domain, Application, Infrastructure, Presentation. Composition root is Helpdesk.
 - Handlers: one command or query per file, handler beside it, internal visibility.
 - Nullable enabled, warnings as errors, file-scoped namespaces.
 - Never: add a NuGet package without asking; touch the database schema without a migration.
-
+- None can reach aggregate inner entities or VO directly.
+- All infrastructural things in application layer may only be reached through abstraction which located in application layer. For example, if you need to send an email, you should create an interface in the application layer and implement it in the infrastructure layer. The application layer should not directly reference any infrastructural implementation.
+- If you write files do step by step with pauses in chat to check if everything is correct. For instance if you have to change 20 files and add 500 linies. Do 5-10 chat iteractions with 20-50 lines each. This is to avoid mistakes and to make sure that the developer is aware of what is being changed.
 ## Git
 - Stay on the checked-out branch (main, unless the developer switched it). Do not create,
   switch, merge or delete branches.
