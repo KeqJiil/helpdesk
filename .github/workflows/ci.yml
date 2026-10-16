@@ -21,7 +21,8 @@ env:
 
 jobs:
   build-and-test:
-    name: Build and test
+    # Must stay equal to the required status check configured in branch protection for main.
+    name: build-and-test
     # Linux runners ship with Docker, which the Testcontainers integration tests need.
     runs-on: ubuntu-latest
     timeout-minutes: 30
