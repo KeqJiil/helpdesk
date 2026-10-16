@@ -5,7 +5,7 @@ using Helpdesk.Tickets.Domain;
 
 namespace Helpdesk.Tickets.Application.Commands.CreateTicket;
 
-public sealed class CreateTicketCommandHandler(ITicketRepository tickets, IUnitOfWork unitOfWork)
+internal sealed class CreateTicketCommandHandler(ITicketRepository tickets, IUnitOfWork unitOfWork)
     : ICommandHandler<CreateTicketCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(CreateTicketCommand command, CancellationToken ct)
