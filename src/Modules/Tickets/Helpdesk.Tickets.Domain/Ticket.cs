@@ -29,13 +29,14 @@ public sealed class Ticket : Entity
         return Success(ticket);
     }
 
-    public Result AddChildTask(string description)
+    public Result<Guid> AddChildTask(string description)
     {
         if (Status == TicketStatus.Closed)
-            return Failure(TicketErrors.AlreadyClosed);
+            return Failure<Guid>(TicketErrors.AlreadyClosed);
 
-        _childTasks.Add(new ChildTask(Guid.NewGuid(), description.Trim()));
-        return Success();
+        var childTask = new ChildTask(Guid.NewGuid(), description.Trim());
+        _childTasks.Add(childTask);
+        return Success(childTask.Id);
     }
 
     public Result CompleteChildTask(Guid childTaskId)

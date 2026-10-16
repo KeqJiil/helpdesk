@@ -1,11 +1,19 @@
 using Helpdesk.Tickets.Application;
+using Helpdesk.Tickets.Infrastructure;
+using Helpdesk.Tickets.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddTicketsApplication();
+var ticketsConnectionString = builder.Configuration.GetConnectionString("Tickets")
+    ?? throw new InvalidOperationException("Connection string 'Tickets' is not configured.");
+
+builder.Services
+    .AddTicketsApplication()
+    .AddTicketsInfrastructure(ticketsConnectionString);
 
 var app = builder.Build();
 
 app.MapGet("/health", () => "OK");
+app.MapTicketsEndpoints();
 
 app.Run();

@@ -28,6 +28,25 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers a no-value command handler wrapped as: logging → validation → handler.
+    /// </summary>
+    public static IServiceCollection AddCommandHandler<TCommand, THandler>(this IServiceCollection services)
+        where TCommand : ICommand
+        where THandler : class, ICommandHandler<TCommand>
+    {
+        services.TryAddScoped<THandler>();
+        services.AddScoped<ICommandHandler<TCommand>>(sp =>
+        {
+            ICommandHandler<TCommand> handler = sp.GetRequiredService<THandler>();
+            handler = new ValidationInterceptor<TCommand>(
+                handler, sp.GetServices<IValidator<TCommand>>());
+            return new LoggingCommandInterceptor<TCommand>(
+                handler, sp.GetRequiredService<ILogger<LoggingCommandInterceptor<TCommand>>>());
+        });
+        return services;
+    }
+
+    /// <summary>
     /// Registers a query handler wrapped as: logging → handler.
     /// </summary>
     public static IServiceCollection AddQueryHandler<TQuery, TResponse, THandler>(this IServiceCollection services)

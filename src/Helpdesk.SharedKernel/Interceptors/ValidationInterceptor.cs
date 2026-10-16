@@ -24,3 +24,23 @@ internal sealed class ValidationInterceptor<TCommand, TResponse>(
         return inner.Handle(command, ct);
     }
 }
+
+/// <summary>Same as <see cref="ValidationInterceptor{TCommand, TResponse}"/>, for commands with no value.</summary>
+internal sealed class ValidationInterceptor<TCommand>(
+    ICommandHandler<TCommand> inner,
+    IEnumerable<IValidator<TCommand>> validators)
+    : ICommandHandler<TCommand>
+    where TCommand : ICommand
+{
+    public Task<Result> Handle(TCommand command, CancellationToken ct)
+    {
+        foreach (var validator in validators)
+        {
+            var errors = validator.Validate(command);
+            if (errors.Count > 0)
+                return Task.FromResult(Result.Failure(errors[0]));
+        }
+
+        return inner.Handle(command, ct);
+    }
+}

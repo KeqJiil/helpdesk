@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <File Path="SKILL.md" />
     <Project Path="src/Helpdesk.Host/Helpdesk.Host.csproj" />
     <Project Path="src/Helpdesk.SharedKernel/Helpdesk.SharedKernel.csproj" />
   </Folder>

@@ -6,3 +6,22 @@
       MSSQL_SA_PASSWORD: "Workshop!Passw0rd"
     ports:
       - "14330:1433"   # host port 14330: a locally installed SQL Server cannot shadow the container
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+  app:
+    build:
+      context: .
+      dockerfile: src/Helpdesk.Host/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      # Inside the compose network SQL Server is reachable as "sql" on its container port 1433.
+      ConnectionStrings__Tickets: "Server=sql,1433;Database=HelpdeskTickets;User Id=sa;Password=Workshop!Passw0rd;TrustServerCertificate=True"
+    ports:
+      - "5000:8080"
+    depends_on:
+      sql:
+        condition: service_healthy
