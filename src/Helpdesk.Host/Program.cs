@@ -18,6 +18,10 @@ builder.Services
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<TicketsDbContext>("tickets-db");
 
+builder.Services.AddMcpServer()
+    .WithHttpTransport(options => options.Stateless = true)
+    .WithToolsFromAssembly(typeof(TicketTools).Assembly);
+
 var app = builder.Build();
 
 // Off by default; the Aspire AppHost turns it on with Migrations__ApplyOnStartup=true.
@@ -29,6 +33,7 @@ if (app.Configuration.GetValue<bool>("Migrations:ApplyOnStartup"))
 
 app.MapDefaultEndpoints();
 app.MapTicketsEndpoints();
+app.MapMcp("/mcp");
 
 app.Run();
 
