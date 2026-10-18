@@ -12,6 +12,8 @@
   <ItemGroup>
     <!-- Integration tests apply migrations through the internal TicketsDbContext. -->
     <InternalsVisibleTo Include="Helpdesk.Tickets.IntegrationTests" />
+    <!-- The Host composition root registers the DbContext health check and applies migrations on startup. -->
+    <InternalsVisibleTo Include="Helpdesk.Host" />
   </ItemGroup>
 
   <PropertyGroup>
